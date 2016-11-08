@@ -28,9 +28,10 @@ int add(int data){
         return 1;
     }
     else{
-        baru->next=head;
         baru->prev=head->prev;
-        head->prev=baru;
+        baru->next=head;
+		head->prev=baru;
+		if(head->next=head)head->next=baru;
         head=baru;
         return 1;
     }
@@ -43,7 +44,7 @@ int deltop(){
     else{
         bantu=head;
         head=head->next;
-        head->prev=bantu->prev;
+        head->prev=bantu;
         free(bantu);
         return 1;
     }
@@ -66,12 +67,12 @@ int search(int data){
 
 void show(){
     struct node *bantu;
+    if(head==NULL)return;
     bantu=head;
     do{
         printf("%d ",bantu->nilai);
         bantu=bantu->next;
     }while(bantu!=head);
-    printf("%\n");
 }
 
 int main(){
