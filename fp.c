@@ -1,6 +1,6 @@
-# include <stdio.h>
-# include <conio.h>
-# include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include<string.h>
 
 typedef struct tree {
    char nama[30];
@@ -36,7 +36,7 @@ void insert(node *root, node *new_node) {
 	}
 }
 
-void *search(node *root, char key[], FILE *output) {
+node *search(node *root, char key[], FILE *output) {
    node *temp;
    temp = root;
 	while (temp != NULL) {
@@ -44,6 +44,7 @@ void *search(node *root, char key[], FILE *output) {
         	fprintf(output,"\nThe Element with Name %s is Present\n", temp->nama);
         	if(temp->id[0]=='5')fprintf(output,"Mahasiswa\nNama : %s\nNo ID : %s\n\n",temp->nama,temp->id);
       		else fprintf(output,"Dosen\nNama : %s\nNo ID : %s\n\n",temp->nama,temp->id);
+      		return temp;
       	}
       	if (strcmp(temp->nama,key)>0)
         	temp = temp->left;
@@ -54,28 +55,38 @@ void *search(node *root, char key[], FILE *output) {
 }
 
 void postorder(node *temp,FILE *output) {
-   if (temp != NULL) {
-      postorder(temp->left,output);
-      postorder(temp->right,output);
-      if(temp->id[0]=='0')fprintf(output,"Output data selesai\n");
-      else if(temp->id[0]=='5')fprintf(output,"Mahasiswa\nNama : %s\nNo ID : %s\n\n",temp->nama,temp->id);
-      else fprintf(output,"Dosen\nNama : %s\nNo ID : %s\n\n",temp->nama,temp->id);
-   }
+   	if 	(temp != NULL) {
+      	postorder(temp->left,output);
+      	postorder(temp->right,output);
+      	fseek(output,0,SEEK_END);
+      	fwrite(temp,sizeof(node),1,output);
+   	}
+}
+
+void tampil(FILE *output){
+	node temp;
+	while(!feof(output)){
+		fread(&temp,sizeof(node),1,output);
+		if(temp.id[0]=='5')
+		printf("Mahasiswa \n Nama : %s\n NRP : %s\n",temp.nama,temp.id);
+		else printf("Dosen \n Nama : %s\n NRP : %s\n",temp.nama,temp.id);
+	}
 }
 
 int main() {
 	int pilih;
-	char ans = 'N';
 	int key;
-	node *new_node, *root, *tmp, *parent;
+	node *new_node, *root, *tmp;
 	node *init_node();
 	root = NULL;
 	char nama[30];
 	char kode[30]="0000000000";
 	FILE *out;
-	out = fopen("output.txt","w");
+	out = fopen("output.exe","wb");
 	FILE *inp;
 	inp = fopen("input.txt","r");
+	FILE *bin;
+	bin = fopen("output.exe","rb");
 
 	root = (node *)malloc(sizeof(node));
 	if(root==NULL)printf("Failed to initiate root nodes");
@@ -106,10 +117,27 @@ int main() {
 		}
 	}
 	postorder(root,out);
-	printf("%s %s\n",root->left->nama,root->left->id);
-	printf("%s %s\n",root->left->left->nama,root->left->left->id);
-	printf("%s %s\n",root->right->nama,root->right->id);
-	printf("%s %s\n",root->right->right->nama,root->right->right->id);
-	search(root,"irvam",out);
+	tampil(bin);
+	char pilihan;char cari[30];
+	while(1){
+		printf("You want to search the data?\n");
+		scanf("%c",&pilihan);
+		switch(pilihan){
+			case 'y':{
+				printf("Masukan nama yang dicari");
+				scanf("%s",cari);
+				tmp = search(root,cari,out);
+				printf("Output Pencarian akan ada di file output.txt\n");
+				if(tmp == NULL)printf("Pencarian gagal,Nama tidak ditemukan\n");
+				break;
+			}
+			case 'n':{
+				return 0;
+				break;
+			}
+		}
+		fflush(stdin);
+	}
+
 	fclose(inp);fclose(out);
 }
