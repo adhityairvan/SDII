@@ -43,13 +43,18 @@ node *search(node *root, char key[], FILE *output) {
     	if (strcmp(temp->nama,key)==0) {
         	fprintf(output,"\nThe Element with Name %s is Present\n", temp->nama);
         	if(temp->id[0]=='5')fprintf(output,"Mahasiswa\nNama : %s\nNo ID : %s\n\n",temp->nama,temp->id);
-      		else fprintf(output,"Dosen\nNama : %s\nNo ID : %s\n\n",temp->nama,temp->id);
+      		else {
+			fprintf(output,"Dosen\nNama : %s\nNo ID : %s\n\n",temp->nama,temp->id);
+			printf("dapet dosen");
+			}	
       		return temp;
       	}
-      	if (strcmp(temp->nama,key)>0)
-        	temp = temp->left;
-      	else
+      	else if (strcmp(temp->nama,key)<0){      	
         	temp = temp->right;
+        }
+      	else if(strcmp(temp->nama,key)>0){
+			temp = temp->left;
+        }
    }
    return NULL;
 }
@@ -65,8 +70,9 @@ void postorder(node *temp,FILE *output) {
 
 void tampil(FILE *output){
 	node temp;
-	while(!feof(output)){
+	while(1){
 		fread(&temp,sizeof(node),1,output);
+		if(feof(output))break;
 		if(temp.id[0]=='5')
 		printf("Mahasiswa \n Nama : %s\n NRP : %s\n",temp.nama,temp.id);
 		else printf("Dosen \n Nama : %s\n NRP : %s\n",temp.nama,temp.id);
@@ -87,13 +93,15 @@ int main() {
 	inp = fopen("input.txt","r");
 	FILE *bin;
 	bin = fopen("output.exe","rb");
+	FILE *text;
+	text = fopen("output.txt","w");
 
 	root = (node *)malloc(sizeof(node));
 	if(root==NULL)printf("Failed to initiate root nodes");
 	root->left=NULL;
 	root->right=NULL;
 	strcpy(root->id,kode);
-	
+	fprintf(text,"kontol");
 	
 	while(!feof(inp)){
 		new_node=init_node();
@@ -126,8 +134,9 @@ int main() {
 			case 'y':{
 				printf("Masukan nama yang dicari");
 				scanf("%s",cari);
-				tmp = search(root,cari,out);
+				tmp = search(root,cari,text);
 				printf("Output Pencarian akan ada di file output.txt\n");
+				if(tmp == NULL)tmp = search(root->right,cari,text);
 				if(tmp == NULL)printf("Pencarian gagal,Nama tidak ditemukan\n");
 				break;
 			}
